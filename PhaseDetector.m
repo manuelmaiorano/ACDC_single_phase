@@ -28,12 +28,12 @@ classdef PhaseDetector < handle
 %             [A, ind] = max(abs(fts(Iv))*2);                                  
 %             phi = phdiffmeasure(obj.past_samples, waves);
             times = t-obj.T:1/obj.fs:t;
-            waves = sin(2*pi*1/obj.T*times);
+            waves = -sin(2*pi*1/obj.T*times);
             wavec = cos(2*pi*1/obj.T*times);
-            xr = mean(obj.past_samples .* waves(1:numel(obj.past_samples))');
-            xi = mean(obj.past_samples .* wavec(1:numel(obj.past_samples))');
+            xr = mean(obj.past_samples .* wavec(numel(times)-numel(obj.past_samples)+1: end)');
+            xi = mean(obj.past_samples .* waves(numel(times)-numel(obj.past_samples)+1: end)');
             A = 2*sqrt(xr^2+xi^2);
-            phi = atan2(xi, xr);
+            phi = atan2(xr, -xi);
             
         end
     end

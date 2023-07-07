@@ -1,3 +1,4 @@
+close all;
 params;
 
 Nx = 3;
@@ -49,12 +50,13 @@ y(1)=0;
 y = zeros(1, ind_fin);
 m = zeros(1, ind_fin);
 
-Vrif = 308;
+Vrif = 300;
 phi_rif = 0;
 x2_av = Vrif;
 x3_av = (Vrif-e)/R2;
 ui_av = 0.5*Va/Vrif + 1.4142135623731*sqrt(-R1*Vrif*x3_av + 0.125*Va^2)/Vrif;
 ur_av = 0.5*L1*omega*(-Va + 2.82842712474619*sqrt(-R1*Vrif*x3_av + 0.125*Va^2))/(R1*Vrif);
+x1_av = 0.5*(Va - 2.82842712474619*sqrt(-R1*Vrif*x3_av + 0.125*Va^2))/R1;
 % x1i_av = Vrif*x3_av/(2*Va);
 % x1r_av = 0;
 % x_av = [x1r_av, x1i_av, Vrif, x3_av]';
@@ -80,7 +82,7 @@ ur_av = 0.5*L1*omega*(-Va + 2.82842712474619*sqrt(-R1*Vrif*x3_av + 0.125*Va^2))/
 % kp=0.0001; ki=0.02;
 get_controller;
 nper = 1;
-xprec=[0, Vrif/2, x3_av]';
+xprec=[x1_av, Vrif, x3_av]';
 for k = 2:ind_fin
  
     u(1, k) = Va*sin(omega*k*h);
