@@ -20,7 +20,7 @@ controller_outer = kp_v + ki_v/s;
 
 phi_rif = 0;
 V_rif = 300;
-A = [sin(phi_rif); cos(phi_rif)];
 
-system = feedback([1,0]*model_inner*controller_inner*A, controller_outer);
+
+system = feedback(model_outer, controller_outer);
 step(system)

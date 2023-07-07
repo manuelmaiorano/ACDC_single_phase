@@ -75,7 +75,7 @@ parameters.L2 = L2;
 parameters.R1 = R1;
 parameters.R2 = R2;
 parameters.C2 = C2;
-parameters.E = E;
+parameters.e = e;
 parameters.Va = Va;
 
 

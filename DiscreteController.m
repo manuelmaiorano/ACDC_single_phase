@@ -37,6 +37,11 @@ classdef DiscreteController < handle
             obj.states(:, 2: end) = obj.states(:, 1:end-1);
             obj.states(:, 1) = outputs;
         end
+        
+        function reset(obj)
+            obj.states = zeros(obj.ny, obj.ns-1);
+            obj.prev_inputs = zeros(obj.nu, obj.ns);
+        end
     end
 end
 

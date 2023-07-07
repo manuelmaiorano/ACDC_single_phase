@@ -51,7 +51,7 @@ y(1)=0;
 y = zeros(1, ind_fin);
 m = zeros(1, ind_fin);
 
-Vrif = 300;
+Vrif = 260;
 phi_rif = 0;
 [x_av, u_av, K] = get_lqr(Vrif, phi_rif, e, R1, R2, L1, L2, C2, Va, omega);
 get_controller;
