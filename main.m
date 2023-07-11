@@ -55,7 +55,6 @@ m = zeros(1, ind_fin);
 
 Vrif = 310;
 phi_rif = 0;
-[x_av, u_av, K] = get_lqr(Vrif, phi_rif, e, R1, R2, L1, L2, C2, Va, omega);
 get_controller;
 nper = 1;
 xprec=[0, Vrif/3, 0]';
@@ -77,14 +76,12 @@ for k = 2:ind_fin
  
     [ur, ui] = controller.step(xprec, k*h, u(1, k), Vrif, phi_rif);
         
-    u_m = sqrt(ur^2 + ui^2);
-    u_phi = atan2(ur, ui);
+    u_m = sqrt(ur^2 + ui^2);%ampiezza segnale di controllo
+    u_phi = atan2(ur, ui);%fase segnale di controllo
     ums(k) = u_m;
     uphis(k) = u_phi;
-%     u_m = sqrt(ur^2 + ui^2);
-%     u_phi = atan2(ur, ui);
     
-    cont(k) = u_m * sin(omega*k*h + u_phi);
+    cont(k) = u_m * sin(omega*k*h + u_phi);%segnale di controllo
     ums(k) = u_m;
     [qa, qb] = modulator(cont(k), k*h, Ts);
     qas(k) = qa;
@@ -114,6 +111,10 @@ plot(tempo, x);
 hold on;
 plot(tempo, u(1, :));
 legend('corrente ingresso', 'tensione capacità', 'corrente induttore', 'tensione ingresso');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 
 global tempo1
 tempo1 = tempo(1:end);
@@ -123,73 +124,80 @@ plot(tempo1, x1ms);
 hold on;
 plot(tempo1, x1phis);
 legend('ampiezza x1', 'fase x1');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 
 figure;
 plot(tempo1, vms);
 hold on;
 plot(tempo1, vphis);
 legend('ampiezza v', 'fase v');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 
 figure;
 plot(tempo1, Irifs);
 legend('corrente rif');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 
 figure;
 plot(tempo, ums);
 hold on;
 plot(tempo, uphis);
 legend('ampiezza controllo', 'fase cotrollo');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 
 figure;
 plot(tempo1, u_hatrs);
 hold on;
 plot(tempo1, u_hatrs);
-legend('u_hat_r', 'u_hat_i');
+legend('uhat_r', 'uhat_i');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 
 figure;
 plot(tempo1, urs);
 hold on;
 plot(tempo1, uis);
 legend('u_r', 'u_i');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 
 figure;
 plot(tempo1, verr);
 legend('errore x2');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 
 figure;
 plot(tempo1, ir_err);
 legend('errore ir');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 
 figure;
 plot(tempo1, iI_err);
 legend('errore iI');
-
-function [x_av, u_av, K] = get_lqr(Vrif, phi_rif, e, R1, R2, L1, L2, C2, Va, omega)
-
-x2_av = Vrif;
-x3_av = (Vrif-e)/R2;
-ui_av = 0.5*Va/Vrif + 1.4142135623731*sqrt(-R1*Vrif*x3_av + 0.125*Va^2)/Vrif;
-ur_av = 0.5*L1*omega*(-Va + 2.82842712474619*sqrt(-R1*Vrif*x3_av + 0.125*Va^2))/(R1*Vrif);
-x1i_av = 0.5*(Va - 2.82842712474619*sqrt(-R1*Vrif*x3_av + 0.125*Va^2))/R1;
-x1r_av = 0;
-x_av = [x1r_av, x1i_av, Vrif, x3_av]';
-u_av = [ur_av, ui_av]';
-A_av =[
-        [-R1/L1, -omega, -ur_av/L1, 0];
-        [-R1/L1, +omega, -ui_av/L1, 0];
-        [0.5*ur_av/C2, 0.5*ui_av/C2, 0, -1/C2];
-        [0, 0, 1/L2, -R2/L2]
-    ];
-
-B_av = [
-    [-x2_av/L1, 0];
-    [0,  -x2_av/L1];
-    [0.5*x1r_av/C2, 0.5*x1i_av/C2];
-    [0, 0]
-   ];
-Q = eye(4);
-Q(3, 3) = 10;
-R = 1000000;
-[K,S,P] = lqr(A_av, B_av, Q, R);
-end
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
 

@@ -1,6 +1,8 @@
 classdef DiscreteController < handle
-    %UNTITLED3 Summary of this class goes here
-    %   Detailed explanation goes here
+    %implementazione di un controllore discretizzato; dalla matrice di
+    %trasferimento (trasformata z) restituisce un oggetto che simula l'evoluzione del
+    %sistema discreto, aggiornando i registri degli stati e degli ingressi
+    %precedenti
     
     properties
         states
