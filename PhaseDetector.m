@@ -15,25 +15,17 @@ classdef PhaseDetector < handle
             obj.T = T;
         end
         
-        function [A, phi] = step(obj, sample, t)
+        function [xr, xi] = step(obj, sample, t)
             obj.past_samples(1: end-1) = obj.past_samples(2: end);
             obj.past_samples(end) = sample;
-%             times = t-obj.T:1/obj.fs:t;
-%             waves = sin(2*pi*1/obj.T*times);
-%             Fn = obj.fs/2;                                                 
-%             L  = length(obj.past_samples);
-%             fts = fft(obj.past_samples)/L;                                         
-%             Fv = linspace(0, 1, fix(L/2)+1)*Fn;                        
-%             Iv = 1:length(Fv);                                          
-%             [A, ind] = max(abs(fts(Iv))*2);                                  
-%             phi = phdiffmeasure(obj.past_samples, waves);
+            
             times = t-obj.T:1/obj.fs:t;
-            waves = -sin(2*pi*1/obj.T*times);
+            waves = sin(2*pi*1/obj.T*times);
             wavec = cos(2*pi*1/obj.T*times);
-            xr = mean(obj.past_samples .* wavec(numel(times)-numel(obj.past_samples)+1: end)');
-            xi = mean(obj.past_samples .* waves(numel(times)-numel(obj.past_samples)+1: end)');
-            A = 2*sqrt(xr^2+xi^2);
-            phi = atan2(xr, -xi);
+            xr = mean(obj.past_samples .* wavec(numel(times)-numel(obj.past_samples)+1: end)')*2;
+            xi = mean(obj.past_samples .* waves(numel(times)-numel(obj.past_samples)+1: end)')*2;
+%             A = 2*sqrt(xr^2+xi^2);
+%             phi = atan2(xr, xi);
             
         end
     end

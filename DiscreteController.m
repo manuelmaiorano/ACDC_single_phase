@@ -31,9 +31,11 @@ classdef DiscreteController < handle
         function outputs = step(obj, inputs)
             obj.prev_inputs(:, 2:end) = obj.prev_inputs(:, 1:end-1);
             obj.prev_inputs(:, 1) = inputs;
+            
             outputs = obj.coeff_matrix * reshape(obj.prev_inputs', [obj.ns*obj.nu, 1])...  
                         - sum(obj.dens .* [zeros(obj.ny, 1), obj.states], 2);
             outputs = outputs./obj.dens(:, 1);
+            
             obj.states(:, 2: end) = obj.states(:, 1:end-1);
             obj.states(:, 1) = outputs;
         end

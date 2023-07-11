@@ -21,23 +21,32 @@ classdef ACDC_single_phase_controller < handle
         
         function [ur, ui] = step(obj, x, t, v, V_rif, phi_rif)
             global x1ms x1phis vms vphis t_step Irifs u_hatrs u_hatis urs uis verr ir_err iI_err
-            [x1m, x1phi] = obj.current_detector.step(x(1), t);
-            [vm, vphi] = obj.voltage_detector.step(v, t);
-            x1ms(floor(t/t_step) +1) = x1m;
-            x1phis(floor(t/t_step) +1) = x1phi;
-            vms(floor(t/t_step) +1) = vm;
-            vphis(floor(t/t_step) +1) = vphi;
-            I_rif = obj.outer_controller.step(V_rif -x(2));Irifs(floor(t/t_step) +1) = I_rif;
-            verr(floor(t/t_step) +1) = V_rif -x(2);
+            
+            [x1r, x1i] = obj.current_detector.step(x(1), t);
+            [vr, vi] = obj.voltage_detector.step(v, t);
+        
+            I_rif = obj.outer_controller.step(V_rif -x(2));
+            
             I_i = I_rif * cos(phi_rif);
             I_r = I_rif * sin(phi_rif);
-            u_hat = obj.inner_controller.step([I_r-x1m*sin(x1phi); I_i-x1m*cos(x1phi)]);
-            ir_err(floor(t/t_step) +1) = I_r-x1m*sin(x1phi); iI_err(floor(t/t_step) +1) = I_i-x1m*cos(x1phi);
-            u_hatrs(floor(t/t_step) +1) = u_hat(1);u_hatis(floor(t/t_step) +1) = u_hat(2);
+            u_hat = obj.inner_controller.step([I_r-x1r; I_i-x1i]);
             
-            ur = (-u_hat(1) + vm*sin(vphi))/x(2);
-            ui = (-u_hat(2) + vm*cos(vphi))/x(2);
-
+            ur = (-u_hat(1) + vr)/x(2);
+            ui = (-u_hat(2) + vi)/x(2);
+            
+            
+            
+            
+            x1ms(floor(t/t_step) +1) = 2*sqrt(x1r^2 + x1i^2);
+            x1phis(floor(t/t_step) +1) = atan2(x1r, x1i);
+            vms(floor(t/t_step) +1) = 2*sqrt(vr^2 + vi^2);
+            vphis(floor(t/t_step) +1) = atan2(vr, vi);
+            Irifs(floor(t/t_step) +1) = I_rif;
+            verr(floor(t/t_step) +1) = V_rif -x(2);
+            ir_err(floor(t/t_step) +1) = I_r-x1r; 
+            iI_err(floor(t/t_step) +1) = I_i-x1i;
+            u_hatrs(floor(t/t_step) +1) = u_hat(1);
+            u_hatis(floor(t/t_step) +1) = u_hat(2);
             urs(floor(t/t_step) +1) = ur;
             uis(floor(t/t_step) +1) = ui;
             

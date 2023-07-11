@@ -1,7 +1,5 @@
 params;
 
-% kp_r = 3.128e+4;
-% ki_r = 1.042;
 kp_r = 0.005;
 ki_r = 3;
 kp_i = kp_r;
@@ -14,11 +12,9 @@ G2 = 1/(s*L1 +R1) * [(s*L1 +R1), -omega*L1;
                           omega*L1, (s*L1 +R1)];
   
 err2u_hat = G2 * err2u_tilde;
-err2u_hatz = c2d(err2u_hat, h, 'tustin');%subs(err2u_hat, s, 2/h*(z-1)/(z+1));
+err2u_hatz = c2d(err2u_hat, h, 'tustin');
 controller_inner = DiscreteController(err2u_hatz);
 
-% kp_v = 4780;
-% ki_v = 10.13;
 kp_v = 10;
 ki_v = 10;
 errv2Irif = kp_v + ki_v/s;

@@ -32,6 +32,8 @@ portante = zeros(1, ind_fin);
 cont = zeros(1, ind_fin);
 ums = zeros(1, ind_fin);
 uphis = zeros(1, ind_fin);
+qas = zeros(1, ind_fin);
+qbs = zeros(1, ind_fin);
 global x1ms x1phis vms vphis t_step Irifs u_hatrs u_hatis urs uis verr ir_err iI_err
 t_step = h;
 x1ms = zeros(1, ind_fin);
@@ -51,36 +53,29 @@ y(1)=0;
 y = zeros(1, ind_fin);
 m = zeros(1, ind_fin);
 
-Vrif = 300;
+Vrif = 310;
 phi_rif = 0;
 [x_av, u_av, K] = get_lqr(Vrif, phi_rif, e, R1, R2, L1, L2, C2, Va, omega);
 get_controller;
 nper = 1;
-xprec=[x_av(2), Vrif/3, x3_av]';
+xprec=[0, Vrif/3, 0]';
 for k = 2:ind_fin
-    if 0
-        R2 = R2 *2;
-        A = [
-        [-R1/L1,    0,      0],
-        [     0,    0,  -1/C2],
-        [     0, 1/L2, -R2/L2]
-       ];
-        M1 = inv(eye(Nx)-h*A);
-        M2 = C*M1*h*B+D;
-        [x_av, u_av, K] = get_lqr(Vrif, phi_rif, e, R1, R2, L1, L2, C2, Va, omega);
+    if 0%k == floor(ind_fin/2)
+%         R2 = R2*2;
+%         A = [
+%         [-R1/L1,    0,      0],
+%         [     0,    0,  -1/C2],
+%         [     0, 1/L2, -R2/L2]
+%        ];
+%         M1 = inv(eye(Nx)-h*A);
+%         M2 = C*M1*h*B+D;
+        Vrif = 250;
 
     end
     u(1, k) = Va*sin(omega*k*h);
     u(2, k) = e;
  
-      ur = ur_av;
-      ui = ui_av;    
     [ur, ui] = controller.step(xprec, k*h, u(1, k), Vrif, phi_rif);
-%     [x1m, x1phi] = controller.current_detector.step(xprec(1), k*h);
-%     x1ms(k) = x1m;
-%     x1phis(k) = x1phi;
-%     x_curr = [x1m*sin(x1phi); x1m*cos(x1phi); xprec(2); xprec(3)];
-%     cont = -K * (x_curr-x_av) + [ur_av; ui_av];
         
     u_m = sqrt(ur^2 + ui^2);
     u_phi = atan2(ur, ui);
@@ -92,6 +87,8 @@ for k = 2:ind_fin
     cont(k) = u_m * sin(omega*k*h + u_phi);
     ums(k) = u_m;
     [qa, qb] = modulator(cont(k), k*h, Ts);
+    qas(k) = qa;
+    qbs(k) = qb;
     
     sig(1, k) = qa;%qa+
     sig(2, k) = 1-qa;%qa-
