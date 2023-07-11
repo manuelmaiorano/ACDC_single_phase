@@ -36,19 +36,19 @@ classdef ACDC_single_phase_controller < handle
             
             
             
-            k = round(t/t_step) +1;
-            x1ms(k) = 2*sqrt(x1r^2 + x1i^2);
-            x1phis(k) = atan2(x1r, x1i);
-            vms(k) = 2*sqrt(vr^2 + vi^2);
-            vphis(k) = atan2(vr, vi);
-            Irifs(k) = I_rif;
-            verr(k) = V_rif -x(2);
-            ir_err(k) = I_r-x1r; 
-            iI_err(k) = I_i-x1i;
-            u_hatrs(k) = u_hat(1);
-            u_hatis(k) = u_hat(2);
-            urs(k) = ur;
-            uis(k) = ui;
+            k = 1;
+            x1ms(floor(t/t_step) +1) = 2*sqrt(x1r^2 + x1i^2);
+            x1phis(floor(t/t_step) +1) = atan2(x1r, x1i);
+            vms(floor(t/t_step) +1) = 2*sqrt(vr^2 + vi^2);
+            vphis(floor(t/t_step) +1) = atan2(vr, vi);
+            Irifs(floor(t/t_step) +1) = I_rif;
+            verr(floor(t/t_step) +1) = V_rif -x(2);
+            ir_err(floor(t/t_step) +1) = I_r-x1r; 
+            iI_err(floor(t/t_step) +1) = I_i-x1i;
+            u_hatrs(floor(t/t_step) +1) = u_hat(1);
+            u_hatis(floor(t/t_step) +1) = u_hat(2);
+            urs(floor(t/t_step) +1) = ur;
+            uis(floor(t/t_step) +1) = ui;
             
         end
     end
