@@ -56,6 +56,7 @@ m = zeros(1, ind_fin);
 Vrif = 310;
 phi_rif = 0;
 get_controller;
+modulator_state = Modulator_with_state();
 nper = 1;
 xprec=[0, Vrif/3, 0]';
 for k = 2:ind_fin
@@ -68,7 +69,7 @@ for k = 2:ind_fin
 %        ];
 %         M1 = inv(eye(Nx)-h*A);
 %         M2 = C*M1*h*B+D;
-        Vrif = 250;
+        phi_rif = pi/6;
 
     end
     u(1, k) = Va*sin(omega*k*h);
@@ -83,7 +84,8 @@ for k = 2:ind_fin
     
     cont(k) = u_m * sin(omega*k*h + u_phi);%segnale di controllo
     ums(k) = u_m;
-    [qa, qb] = modulator(cont(k), k*h, Ts);
+    %[qa, qb] = modulator(cont(k), k*h, Ts);
+    [qa, qb] = modulator_state.step(cont(k), k*h, Ts);
     qas(k) = qa;
     qbs(k) = qb;
     
