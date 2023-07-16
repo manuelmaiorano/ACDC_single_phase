@@ -2,14 +2,14 @@ params;
 
 s = tf('s');
 
-kp_r = 0.005;
-ki_r = 3;
-kp_i = kp_r;
-ki_i = ki_r;
+kp_d = 0.005;
+ki_d = 3;
+kp_q = 0.005;
+ki_q = 3;
 
 %PI controllore interno
-err2u_tilde = [(kp_r +ki_r/s), 0;
-                0, (kp_i +ki_i/s)];
+err2u_tilde = [(kp_d +ki_d/s), 0;
+                0, (kp_q +ki_q/s)];
 %matrice di trasformazione G2
 G2 = 1/(s*L1 +R1) * [(s*L1 +R1), -omega*L1;
                           omega*L1, (s*L1 +R1)];
@@ -21,15 +21,19 @@ controller_inner = DiscreteController(err2u_hatz);
 
 %controllore loop esterno e discretizzazione      
 kp_v = 10;
-ki_v = 10;
+ki_v = 20;
+% kp_v = 0.0167;
+% ki_v = 0.749;
 errv2Irif = kp_v + ki_v/s;
 errv2Irifz = c2d(errv2Irif, h, 'tustin');
 controller_outer = DiscreteController(errv2Irifz);
 
 %creazione controllore
+x2_filter = AvgFilter(floor(T/h));
 current_detector = PhaseDetector(floor(T/h), 1/h, T);
 voltage_detector = PhaseDetector(floor(T/h), 1/h, T);
-controller = ACDC_single_phase_controller(controller_outer, controller_inner, current_detector, voltage_detector);
+controller = ACDC_single_phase_controller(controller_outer, controller_inner,...
+    current_detector, voltage_detector, x2_filter);
 
 %test se controllore discretizzato stessa risposta al gradino 
 %test_outer(controller_outer, errv2Irif, h);

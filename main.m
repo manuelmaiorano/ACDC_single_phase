@@ -34,31 +34,31 @@ ums = zeros(1, ind_fin);
 uphis = zeros(1, ind_fin);
 qas = zeros(1, ind_fin);
 qbs = zeros(1, ind_fin);
-global x1ms x1phis vms vphis t_step Irifs u_hatrs u_hatis urs uis verr ir_err iI_err
+global x1ms x1phis vms vphis t_step Irifs u_hatds u_hatqs uds uqs verr id_err iq_err
 t_step = h;
 x1ms = zeros(1, ind_fin);
 x1phis = zeros(1, ind_fin);
 vms = zeros(1, ind_fin);
 vphis = zeros(1, ind_fin);
 Irifs = zeros(1, ind_fin);
-u_hatrs = zeros(1, ind_fin);
-u_hatis = zeros(1, ind_fin);
-urs = zeros(1, ind_fin);
-uis = zeros(1, ind_fin);
+u_hatds = zeros(1, ind_fin);
+u_hatqs = zeros(1, ind_fin);
+uds = zeros(1, ind_fin);
+uqs = zeros(1, ind_fin);
 verr = zeros(1, ind_fin);
-ir_err = zeros(1, ind_fin);
-iI_err = zeros(1, ind_fin);
+id_err = zeros(1, ind_fin);
+iq_err = zeros(1, ind_fin);
 
 y(1)=0;
 y = zeros(1, ind_fin);
 m = zeros(1, ind_fin);
 
 Vrif = 310;
-phi_rif = 0;
+phi_rif = 0.07;
 get_controller;
 modulator_state = Modulator_with_state();
 nper = 1;
-xprec=[0, Vrif/3, 0]';
+xprec=[0, Vrif, 0]';
 for k = 2:ind_fin
     if 0%k == floor(ind_fin/2)
 %         R2 = R2*2;
@@ -69,20 +69,21 @@ for k = 2:ind_fin
 %        ];
 %         M1 = inv(eye(Nx)-h*A);
 %         M2 = C*M1*h*B+D;
-        phi_rif = pi/6;
+        phi_rif = 0.05;
+        %Vrif = 250;
 
     end
-    u(1, k) = Va*sin(omega*k*h);
+    u(1, k) = Va*cos(omega*k*h);
     u(2, k) = e;
  
-    [ur, ui] = controller.step(xprec, k*h, u(1, k), Vrif, phi_rif);
+    [ud, uq] = controller.step(xprec, k*h, u(1, k), Vrif, phi_rif);
         
-    u_m = sqrt(ur^2 + ui^2);%ampiezza segnale di controllo
-    u_phi = atan2(ur, ui);%fase segnale di controllo
+    u_m = sqrt(ud^2 + uq^2);%ampiezza segnale di controllo
+    u_phi = atan2(uq, ud);%fase segnale di controllo
     ums(k) = u_m;
     uphis(k) = u_phi;
     
-    cont(k) = u_m * sin(omega*k*h + u_phi);%segnale di controllo
+    cont(k) = u_m * cos(omega*k*h + u_phi);%segnale di controllo
     ums(k) = u_m;
     %[qa, qb] = modulator(cont(k), k*h, Ts);
     [qa, qb] = modulator_state.step(cont(k), k*h, Ts);
@@ -121,11 +122,18 @@ grid on; box on; set (gca,'FontSize',11);
 global tempo1
 tempo1 = tempo(1:end);
 tempo1(end+1) = tempo1(end)+h;
+
+figure;
+plot(tempo1, x1phis);
+legend('fase x1');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
+
 figure;
 plot(tempo1, x1ms);
-hold on;
-plot(tempo1, x1phis);
-legend('ampiezza x1', 'fase x1');
+legend('ampiezza x1');
 xlabel('tempo[s]');
 set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
 'YMinorGrid','on','GridLineStyle',':');
@@ -160,20 +168,20 @@ set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
 grid on; box on; set (gca,'FontSize',11);
 
 figure;
-plot(tempo1, u_hatrs);
+plot(tempo1, u_hatds);
 hold on;
-plot(tempo1, u_hatrs);
-legend('uhat_r', 'uhat_i');
+plot(tempo1, u_hatqs);
+legend('uhat_d', 'uhat_q');
 xlabel('tempo[s]');
 set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
 'YMinorGrid','on','GridLineStyle',':');
 grid on; box on; set (gca,'FontSize',11);
 
 figure;
-plot(tempo1, urs);
+plot(tempo1, uds);
 hold on;
-plot(tempo1, uis);
-legend('u_r', 'u_i');
+plot(tempo1, uqs);
+legend('u_d', 'u_q');
 xlabel('tempo[s]');
 set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
 'YMinorGrid','on','GridLineStyle',':');
@@ -188,16 +196,16 @@ set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
 grid on; box on; set (gca,'FontSize',11);
 
 figure;
-plot(tempo1, ir_err);
-legend('errore ir');
+plot(tempo1, iq_err);
+legend('errore iq');
 xlabel('tempo[s]');
 set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
 'YMinorGrid','on','GridLineStyle',':');
 grid on; box on; set (gca,'FontSize',11);
 
 figure;
-plot(tempo1, iI_err);
-legend('errore iI');
+plot(tempo1, id_err);
+legend('errore id');
 xlabel('tempo[s]');
 set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
 'YMinorGrid','on','GridLineStyle',':');

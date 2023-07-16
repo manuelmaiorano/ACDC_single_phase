@@ -3,31 +3,34 @@ classdef PhaseDetector < handle
     %   Detailed explanation goes here
     
     properties
-        past_samples
+        past_samplesd
+        past_samplesq
         fs
         T
+        b
     end
     
     methods
         function obj = PhaseDetector(N, fs, T)
-            obj.past_samples = zeros([N, 1]);
+            obj.past_samplesd = zeros([N, 1]);
+            obj.past_samplesq = zeros([N, 1]);
             obj.fs = fs;
             obj.T = T;
+            obj.b = ones([1, N])/N;
+            %obj.b = flip(obj.b);
         end
         
-        function [xr, xi] = step(obj, sample, t)
-            obj.past_samples(1: end-1) = obj.past_samples(2: end);
-            obj.past_samples(end) = sample;
+        function [xd, xq] = step(obj, sample, t)
+            obj.past_samplesd(2: end) = obj.past_samplesd(1: end-1);
+            obj.past_samplesd(1) = sample*cos(2*pi*1/obj.T*t);
             
-            %segnali seno e coseno 
-            times = t-obj.T:1/obj.fs:t;
-            waves = sin(2*pi*1/obj.T*times);
-            wavec = cos(2*pi*1/obj.T*times);
+            obj.past_samplesq(2: end) = obj.past_samplesq(1: end-1);
+            obj.past_samplesq(1) = sample*sin(2*pi*1/obj.T*t);
             
-            %calcolo componenti in fase e quadratura correnti a partire dal
-            %vettore di campioni precedenti
-            xr = mean(obj.past_samples .* wavec(numel(times)-numel(obj.past_samples)+1: end)')*2;
-            xi = mean(obj.past_samples .* waves(numel(times)-numel(obj.past_samples)+1: end)')*2;
+%             xd = mean(obj.past_samplesd)*2;
+%             xq = -mean(obj.past_samplesq)*2;
+            xd = obj.b * obj.past_samplesd*2;
+            xq = -obj.b * obj.past_samplesq*2;
         end
     end
 end
