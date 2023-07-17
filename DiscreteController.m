@@ -18,7 +18,7 @@ classdef DiscreteController < handle
         function obj = DiscreteController(transfer_matrix)
             [num, den] = tfdata(transfer_matrix);
             [ny, nu] = size(transfer_matrix);
-            ns = numel(cell2mat(num(1,1)));
+            ns = numel(cell2mat(den(1,1)));
             dens = cell2mat(den);
             dens = dens(:,1:ns);
             obj.ns = ns;
