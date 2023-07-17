@@ -3,9 +3,9 @@ params;
 s = tf('s');
 
 kp_d = 0.005;
-ki_d = 1;
+ki_d = 3;
 kp_q = 0.005;
-ki_q = 1;
+ki_q = 3;
 
 %PI controllore interno
 err2u_tilde = [(kp_d +ki_d/s), 0;
@@ -20,8 +20,8 @@ err2u_hatz = c2d(err2u_hat, h, 'tustin');
 controller_inner = DiscreteController(err2u_hatz);
 
 %controllore loop esterno e discretizzazione      
-kp_v = 15;
-ki_v = 15;
+kp_v = 10;
+ki_v = 10;
 % kp_v = 0.0167;
 % ki_v = 0.749;
 errv2Irif = kp_v + ki_v/s;

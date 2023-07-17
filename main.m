@@ -12,7 +12,7 @@ omega=2*pi/T;
 fs = 2.4e+3;
 Ts = 1/fs;
 h = Ts/100;
-durata_simulazione = 10*T;
+durata_simulazione = 20*T;
 
 % Integrazione del modello con backward Eulero
 M1 = inv(eye(Nx)-h*A);
