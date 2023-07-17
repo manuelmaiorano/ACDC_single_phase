@@ -54,7 +54,7 @@ y = zeros(1, ind_fin);
 m = zeros(1, ind_fin);
 
 Vrif = 310;
-phi_rif = 0.07;
+phi_rif = 0.0;
 get_controller;
 modulator_state = Modulator_with_state();
 nper = 1;
