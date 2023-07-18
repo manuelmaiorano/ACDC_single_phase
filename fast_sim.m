@@ -38,10 +38,22 @@ x0 = [0, Vrif/2, 0]';
 [t, x] = eulero_forward(@(t, x) model(t, x, R1, R2, L1, L2, C2, e, Va, h, controller, modulator_state, Vrif, phi_rif, Ts, omega, t_fin), t_fin, h, x0);
 
 figure;
-plot(t, x);
+plot(t, x, 'LineWidth', 2);
 hold on;
-plot(t, Va*cos(omega*t));
+plot(t, Va*cos(omega*t), 'LineWidth', 2);
 legend('corrente ingresso', 'tensione capacità', 'corrente induttore', 'tensione ingresso');
+xlabel('tempo[s]');
+set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
+'YMinorGrid','on','GridLineStyle',':');
+grid on; box on; set (gca,'FontSize',11);
+
+global tempo1
+tempo1 = tempo(1:end);
+tempo1(end+1) = tempo1(end)+h;
+
+figure;
+plot(tempo1, x1phis, 'LineWidth', 2);
+legend('fase x1');
 xlabel('tempo[s]');
 set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
 'YMinorGrid','on','GridLineStyle',':');
