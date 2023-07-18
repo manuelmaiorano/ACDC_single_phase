@@ -3,7 +3,7 @@ params;
 
 Nx = 3;
 Nz = 12;
-%Nz = 4;
+Nz = 4;
 Nu = 2;
 Nq = 4;
 T = 1/50;
@@ -107,7 +107,7 @@ for k = 2:ind_fin
     xprec = x(:,k);
 end
 
-tempo = h:h:ind_fin*h;
+tempo = 0:h:ind_fin*h;
 
 figure;
 plot(tempo, x);
