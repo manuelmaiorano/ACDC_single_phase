@@ -15,7 +15,7 @@ modulator_state = Modulator_with_state();
 
 times = 0:h:t_fin;
 ind_fin=round(t_fin/h);
-global x1ms x1phis vms vphis t_step Irifs u_hatds u_hatqs uds uqs verr id_err iq_err
+global x1ms x1phis vms vphis t_step Irifs u_hatds u_hatqs uds uqs verr id_err iq_err qas qbs conts ums uphis
 t_step = h;
 x1ms = zeros(1, ind_fin);
 x1phis = zeros(1, ind_fin);
@@ -29,6 +29,11 @@ uqs = zeros(1, ind_fin);
 verr = zeros(1, ind_fin);
 id_err = zeros(1, ind_fin);
 iq_err = zeros(1, ind_fin);
+qas = zeros(1, ind_fin);
+qbs = zeros(1, ind_fin);
+conts = zeros(1, ind_fin);
+ums = zeros(1, ind_fin);
+uphis = zeros(1, ind_fin);
 
 options = odeset('Stats','on','OutputFcn',@odeplot, 'Events',...
     @(t, y) fixed_time_step_controller(t, y, h, controller, modulator_state, Va, Vrif, phi_rif, Ts, omega), 'MaxStep', h);
@@ -37,27 +42,7 @@ x0 = [0, Vrif/2, 0]';
 %[t, x] = ode45(@(t, x) model(t, x, R1, R2, L1, L2, C2, e, Va, omega, Ts), times, x0, options);
 [t, x] = eulero_forward(@(t, x) model(t, x, R1, R2, L1, L2, C2, e, Va, h, controller, modulator_state, Vrif, phi_rif, Ts, omega, t_fin), t_fin, h, x0);
 
-figure;
-plot(t, x, 'LineWidth', 2);
-hold on;
-plot(t, Va*cos(omega*t), 'LineWidth', 2);
-legend('corrente ingresso', 'tensione capacità', 'corrente induttore', 'tensione ingresso');
-xlabel('tempo[s]');
-set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
-'YMinorGrid','on','GridLineStyle',':');
-grid on; box on; set (gca,'FontSize',11);
-
-global tempo1
-tempo1 = tempo(1:end);
-tempo1(end+1) = tempo1(end)+h;
-
-figure;
-plot(tempo1, x1phis, 'LineWidth', 2);
-legend('fase x1');
-xlabel('tempo[s]');
-set (gca,'XMinorTick','on','XMinorGrid','on','YMinorTick','on',...
-'YMinorGrid','on','GridLineStyle',':');
-grid on; box on; set (gca,'FontSize',11);
+make_plots;
 
 function [t, x] = eulero_forward(model, t_fin, t_step, x0)
     t = 0:t_step:t_fin;
@@ -70,19 +55,31 @@ function [t, x] = eulero_forward(model, t_fin, t_step, x0)
 end
 
 function dx = model(t, x, R1, R2, L1, L2, C2, e, Va, h, controller, modulator, Vrif, phi_rif, Ts, omega, t_fin)
-    %global qa qb 
+    global qas qbs conts t_step ums uphis
+    k = round(t/t_step) +1;
     u = Va * cos(omega*t);
-    if t > t_fin/2
-        phi_rif = 0.2;
+    if t > t_fin/3
+        Vrif = 250;
+    end
+    if t > t_fin*2/3
+        phi_rif = pi/6;
     end
     
     [ud, uq] = controller.step(x, t, u, Vrif, phi_rif);
+    [udff, uqff] = get_feedforward(Vrif, phi_rif, R1, R2, L1, omega, Va, e);
+    ud = ud + udff;
+    uq = uq + uqff;
 
     u_m = sqrt(ud^2 + uq^2);
     u_phi = atan2(uq, ud);
     cont = u_m * cos(omega*t + u_phi);
-
+    conts(k) = cont;
+    ums(k) = u_m;
+    uphis(k) = u_phi;
+    
     [qa, qb] = modulator.step(cont, t, Ts);
+    qas(k) = qa; qbs(k) = qb;
+    
     dx1 = -R1/L1 * x(1) -(qa-qb)*x(2)/L1 + u/L1;
     dx2 =(qa-qb)*x(1)/C2- x(3)/C2;
     dx3 = x(2)/L2 - R2/L2 * x(3) - e/L2;
